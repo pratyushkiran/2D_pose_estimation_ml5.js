@@ -2,13 +2,15 @@ let video;
 
 let bodyPose;
 
-let prevX = 0;
-let prevY = 0;
+let lerpedX = 0;
+let lerpedY = 0;
+
+let lerpAmount = 0.4;
 
 poses = [];
 
 function preload() {
-  bodyPose = ml5.bodyPose("MoveNet", { flipped: false });
+  bodyPose = ml5.bodyPose("MoveNet", { flipped:true });
 }
 
 function gotPoses(results) {
@@ -21,7 +23,7 @@ function mousePressed() {
 
 function setup() {
   createCanvas(innerWidth, innerHeight);
-  video = createCapture(VIDEO, { flipped:false });
+  video = createCapture(VIDEO, { flipped:true });
   video.hide();
 
   bodyPose.detectStart(video, gotPoses);
@@ -30,33 +32,21 @@ function setup() {
 }
 
 function draw() {
-s
   image(video, 0, 0);
 
-
   if (poses.length > 0) {
-
     let pose = poses[0];
-
     let x = pose.nose.x;
     let y = pose.nose.y;
 
-    let lerpAmount = 0.4;
+    lerpedX = lerp(lerpedX, x, lerpAmount); 
+    lerpedY = lerp(lerpedY, y, lerpAmount);
 
-    // Interpolate between previous and current positions
-    let lerpedX = lerp(prevX, x, lerpAmount); // Adjust the last parameter (0.1) for smoother/slower interpolation
-    let lerpedY = lerp(prevY, y, lerpAmount);
-
-    // Draw the interpolated position
     fill(255, 0, 0);
-    circle(lerpedX, lerpedY, 40); // smoothened keypoints
-    
-    // Update previous positions
-    prevX = lerpedX;
-    prevY = lerpedY;
+    noStroke();
+    circle(lerpedX, lerpedY, 40); 
 
     // for detecting all the keypoints
-
     for (let i = 0; i < pose.keypoints.length; i++) {
       let keypoint = pose.keypoints[i];
       fill(0, 255, 0); 
@@ -67,7 +57,6 @@ s
     }  
 
     // for connecting lines
-
     for (let i = 0; i < connections.length; i++) {
       let connection = connections[i];
       let a = connection[0];
@@ -78,15 +67,12 @@ s
       let confA = keyPointA.confidence;
       let confB = keyPointB.confidence;
 
-      // if (confA > 0.1 && confB > 0.1) {
-      stroke(0, 255, 0);
-      strokeWeight(4);
-      line(keyPointA.x, keyPointA.y, keyPointB.x, keyPointB.y);
-      // }
+      if (confA > 0.1 && confB > 0.1) {
+        stroke(0, 255, 0);
+        strokeWeight(4);
+        line(keyPointA.x, keyPointA.y, keyPointB.x, keyPointB.y);
+      }
     }
-
-
-
 
     // ================================================================= 
     // detect the left wrist and the right wrist and draw the nose radius according to the distance between two wrists
@@ -107,7 +93,6 @@ s
     // circle(x, y, d);
     // ================================================================= 
 
-    
   }
 }
 
