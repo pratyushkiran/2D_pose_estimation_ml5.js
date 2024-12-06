@@ -37,7 +37,7 @@ function setup() {
 }
 
 function draw() {
-  background(0);
+  background(3);
   maintainAspectRatio();
 
   image(video, videoOffsetX, videoOffsetY, videoWidth, videoHeight);
